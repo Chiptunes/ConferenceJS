@@ -26,8 +26,13 @@ Answer the offer in the other side:
       // This desc must be sended to the other peer to
     });
 
-Add the desc from the second peer and start talk!:
+Add the desc from the second peer and start talk:
 
     peer.initCall( remoteDesc, function ( err ) {
       // The call has started!
     });
+
+Add the ICE Candidates:
+    peer.addIceCandidate(data);
+
+Enjoy!

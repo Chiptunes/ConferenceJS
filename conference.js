@@ -3,13 +3,15 @@ var configuration      = { "iceServers": [ /* Write your STUN/TURN server list *
 var RTCPeerConnection  = webkitRTCPeerConnection || mozRTCPeerConnection;
 navigator.getUserMedia = navigator.getUserMedia  || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-function Peer( addstream, icecandidate ) {
+function Peer( localVid, addstream, icecandidate ) {
 	
 	var state = 0;
 	var pc = new RTCPeerConnection( configuration );
 
 	pc.onaddstream    = addstream;
 	pc.onicecandidate = icecandidate;
+
+	this.local = localVid;
 
 	this.offer = function ( callElements, callback ) {
 
@@ -19,6 +21,9 @@ function Peer( addstream, icecandidate ) {
 				
 				this.stream = stream;
 				pc.addStream( stream );
+
+				this.local.src = URL.createObjectURL( stream );
+				this.local.play();
 
 				pc.createOffer( function ( desc ) {
 
@@ -38,7 +43,7 @@ function Peer( addstream, icecandidate ) {
 
 	}
 
-	this.answer = function ( callElements, remoteDesc, remote ) {
+	this.answer = function ( callElements, remoteDesc, callback ) {
 
 		if ( state === 0 ) {
 
@@ -48,6 +53,9 @@ function Peer( addstream, icecandidate ) {
 
 				this.stream = stream;
 				pc.addStream( stream );
+
+				this.local.src = URL.createObjectURL( stream );
+				this.local.play();
 
 				pc.createAnswer( function ( desc ) {
 
@@ -77,6 +85,17 @@ function Peer( addstream, icecandidate ) {
 		} else {
 			callback("THIS METHOD CAN'T BE CALLED AT THIS MOMENT");
 		}
+
+	}
+
+	this.addIceCandidate = function ( ICEInfo ) {
+
+		var candidate = new RTCIceCandidate({
+                    sdpMLineIndex: ICEInfo.label,
+                    candidate: ICEInfo.candidate
+                });
+
+        pc.addIceCandidate( candidate );
 
 	}
 	
