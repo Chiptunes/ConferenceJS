@@ -38,13 +38,13 @@ function Peer( addstream, icecandidate ) {
 
 	}
 
-	this.answer = function ( callElements, remote ) {
+	this.answer = function ( callElements, remoteDesc, remote ) {
 
 		if ( state === 0 ) {
 
 			navigator.getUserMedia( callElements, function ( stream ) {
 
-				pc.setRemoteDescription( new RTCSessionDescription( desc ) );
+				pc.setRemoteDescription( new RTCSessionDescription( remoteDesc ) );
 
 				this.stream = stream;
 				pc.addStream( stream );
@@ -65,6 +65,17 @@ function Peer( addstream, icecandidate ) {
 			callback( "PEER CAN'T ANSWER", null );
 		} else {
 			callElements( "PEER OBJECT IS UNUSABLE", null );
+		}
+
+	}
+
+	this.initCall = function ( remoteDesc, callback ) {
+
+		if ( state === 1 ) {
+			pc.setRemoteDescription( new RCTSessionDescription( remoteDesc ) );
+			callback(false);
+		} else {
+			callback("THIS METHOD CAN'T BE CALLED AT THIS MOMENT");
 		}
 
 	}
