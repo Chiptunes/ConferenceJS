@@ -1,0 +1,75 @@
+<html>
+<head>
+	<title>Conferece.JS demo</title>
+	
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="/conference.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="/bootstrap.min.css">
+
+</head>
+
+	<h1>Simple videoconference demo</h1>
+
+	<video id="local" muted style="width: 400px; height: 400px;"></video>
+	<video id="remote" style="width: 400px; height: 400px;"></video>
+
+	<button id="start" class="btn">Start call</button>
+
+<script type="text/javascript">
+
+	var socket      = io.connect('http://localhost:8080');
+	var username    = prompt('Write an username'),
+		remoteVid   = document.getElementById('remote'),
+		user;
+
+	function addStream ( event ) {
+		remoteVid.src = URL.createObjectURL( event.stream );
+		remoteVid.play();
+	}
+
+	function ICECandidate ( e ) {
+
+		if ( e.candidate ) {
+            
+            socket.emit("ICEcandidate", {  
+                label: e.candidate.sdpMLineIndex,
+                id: e.candidate.sdpMid,
+                candidate: e.candidate.candidate,
+                user: user
+            });
+
+        }
+
+	}
+
+	var peer = new Peer( document.getElementById('local'), addStream, ICECandidate );
+
+	socket.on( username, function ( data ) {
+		peer.answer({ audio: true, video: true }, data.desc, function ( err, desc ) {
+			user = data.user;
+			socket.emit('callAnswered', { desc: desc, user: data.user });
+		});
+	});
+
+	socket.on( username + 'hs', function ( data ) {
+		peer.initCall( data.desc, function ( err ) {
+			if ( err ) console.log('Call not iniciated');
+		});
+	});
+
+	socket.on( username + 'ic', function ( data ) {
+		peer.addIceCandidate( new RTCIceCandidate( data ) );
+	});
+
+	document.getElementById('start').addEventListener('click', function () {
+		user = prompt("Write your friend's username");
+		peer.offer({ video: true, audio: true }, function ( err, desc ) {
+			if( !err ) socket.emit('initCall', { user: user, desc: desc, local: username });
+		});
+	});
+
+</script>	
+
+</body>
+</html>
