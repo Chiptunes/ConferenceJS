@@ -54,6 +54,7 @@ io.sockets.on('connection', function ( socket ) {
 
 	socket.on("ICEcandidate", function ( data ) {
 		
+		// THIS TIMEOUT IS USED TO AVOID COLLISION PROBLEMS WITH THE REMOTE DESCRIPTIONS
 		setTimeout( function () {
 
 			socket.broadcast.emit( data.user + 'ic', {
