@@ -1,4 +1,4 @@
-Conference.JS
+ConferenceJS
 =============
 
 A simple WebRTC wrapper for video-conferences
