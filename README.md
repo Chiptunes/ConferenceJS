@@ -33,6 +33,7 @@ Add the desc from the second peer and start talk:
     });
 
 Add the ICE Candidates:
+
     peer.addIceCandidate(data);
 
 Enjoy!
